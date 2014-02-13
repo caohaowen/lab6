@@ -12,6 +12,7 @@ function initializePage() {
 	$('.project a').click(addProjectDetails);
 
 	$('#colorBtn').click(randomizeColors);
+	$('#spotifyBtn').click(TrySpotify);
 }
 
 /*
@@ -25,8 +26,33 @@ function addProjectDetails(e) {
 	var projectID = $(this).closest('.project').attr('id');
 	// get rid of 'project' from the front of the id 'project3'
 	var idNumber = projectID.substr('project'.length);
+	$("#project" + idNumber).click(function(e) {
+		$.get("/project/" + idNumber, addProject);
+	});
 
 	console.log("User clicked on project " + idNumber);
+}
+
+function TrySpotify(e) {
+   $.get(
+    'http://ws.spotify.com/search/1/track.json?q=Taylor+Swift',
+   	function (result) {
+   	var appendHTML = '<div class="thumbnail"><h4>Taylor Swift search result:</h4><p>'+
+   		result.info.num_results+" related results</p></div>"
+  	$('#spotify').html(appendHTML)
+     
+   })
+ 
+ }
+
+function addProject(result) {
+	console.log(result);
+	var projecthtml = '<a href = "#" class = "thumbnail" >' + 
+	'<img src = "' + result['image'] + '" class = "detailsImage">' + 
+	'<p>' + result['title'] + '</p></a>' +
+	'<p>' + result['summary'] + '</p>' +
+	'<p><small>' + result['date'] + '</small></p>';
+	$("#project" + result['id'] + " .details").html(projecthtml);
 }
 
 /*
@@ -35,4 +61,12 @@ function addProjectDetails(e) {
  */
 function randomizeColors(e) {
 	console.log("User clicked on color button");
+	$.get('/palette', function(result){
+		var colors = result.colors.hex;
+		$('body').css('background-color', colors[0]);
+		$('.thumbnail').css('background-color', colors[1]);
+		$('h1, h2, h3, h4, h5, h5').css('color', colors[2]);
+		$('p').css('color', colors[3]);
+		$('.project img').css('opacity', .75);
+	})
 }
